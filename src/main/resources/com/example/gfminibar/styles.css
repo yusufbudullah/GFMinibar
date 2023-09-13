@@ -1,0 +1,9 @@
+.selected-panel {
+  -fx-border-color: #819fa7;
+  -fx-border-width: 2;
+  -fx-border-style: solid;
+}
+
+.my-radio-button:selected .dot {
+    -fx-mark-color: #819fa7;
+}
