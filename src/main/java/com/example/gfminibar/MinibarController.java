@@ -1,7 +1,11 @@
 package com.example.gfminibar;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -15,11 +19,23 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.grammaticalframework.pgf.*;
+
 
 public class MinibarController {
 
     @FXML
     private VBox tester;
+    @FXML
+    private VBox translationPane;
+    @FXML
+    private ComboBox<GrammarFile> grammarDropdown;
+    @FXML
+    private ComboBox<String> startcatDropdown;
+    @FXML
+    private ComboBox<String> fromDropdown;
+    @FXML
+    private ComboBox<String> toDropdown;
 
     private ToggleGroup globalToggleGroup = new ToggleGroup();
 
@@ -128,49 +144,102 @@ public class MinibarController {
         }
     }
 
+    @FXML
+    public void addTranslationPanel(String langText) {
+        try {
+            // Load the Translation panel
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("translation.fxml"));
+            HBox translationPanel = loader.load();
+
+            // Get the controller and set data
+            TranslationController translationController = loader.getController();
+            translationController.getLangLabel().setText(langText);
+
+            // Set alignment to center the HBox within the tester VBox
+            translationPanel.setAlignment(Pos.CENTER);
+
+            // Set margin to position the HBox within the tester VBox
+            translationPane.setMargin(translationPanel, new Insets(5, 0, 5, 4));
+
+            // Add the panel to the translationPane VBox
+            translationPane.getChildren().add(translationPanel);
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Handle the exception (e.g., show an error dialog)
+        }
+    }
 
     @FXML
-    void populateWordsPane() {
-        // Create a VBox to hold the numbers
-        VBox numberContainer = new VBox();
-        numberContainer.setSpacing(10); // Set spacing between numbers
+    public void clearTranslationPanels() {
+        translationPane.getChildren().clear();
+    }
 
-        int maxNumbersPerRow = 50; // Maximum number of numbers per row
-        int totalNumbers = 800; // Total number of numbers to display
-        int currentNumber = 1;
+    @FXML
+    GrammarManager gm = new GrammarManager();
 
-        for (int row = 0; row < totalNumbers / maxNumbersPerRow; row++) {
-            // Create an HBox for each row
-            HBox rowContainer = new HBox();
-            rowContainer.setSpacing(10); // Adjust spacing as needed
 
-            for (int col = 0; col < maxNumbersPerRow; col++) {
-                // Create a Label for each number
-                Label numberLabel = new Label(Integer.toString(currentNumber));
-                // Set the click event handler
-                numberLabel.setOnMouseClicked(event -> {
-                    System.out.println(numberLabel.getText());
-                    if (currentSelectedSentenceController != null) {
-                        currentSelectedSentenceController.populateTextField(numberLabel.getText());
-                    }
-                });
-                numberLabel.setStyle("-fx-border-color: black;"); // Add border for better visualization
-                rowContainer.getChildren().add(numberLabel);
 
-                currentNumber++;
+    @FXML
+    void populateWordsPane(String text) {
+        // Create a VBox to hold the words
+        VBox wordContainer = new VBox();
+        wordContainer.setSpacing(10); // Set spacing between rows
+        String selectedFrom = fromDropdown.getSelectionModel().getSelectedItem();
+        String selectedCat = startcatDropdown.getSelectionModel().getSelectedItem();
 
-                if (currentNumber > totalNumbers) {
-                    break; // All numbers added
+
+
+        List<String> words = gm.loadWords(selectedFrom, selectedCat, text); //list of words
+
+        double maxWidth = wordsPane.getWidth(); // Get the width of the wordsPane
+        double currentWidth = 0; // Track the current width of the row
+
+        // Create an HBox for each row
+        HBox rowContainer = new HBox();
+        rowContainer.setSpacing(10); // Adjust spacing as needed
+        rowContainer.getStyleClass().add("word-row-container");
+
+        for (String word : words) {
+            Label wordLabel = new Label(word);
+
+            wordLabel.setOnMouseClicked(event -> {
+                System.out.println(wordLabel.getText());
+                if (currentSelectedSentenceController != null) {
+                    currentSelectedSentenceController.populateTextField(wordLabel.getText());
                 }
+            });
+
+            wordLabel.setStyle("-fx-border-color: black;"); // Add border for better visualization
+            wordLabel.setStyle("-fx-background-color:  #f2efea");
+            wordLabel.setPadding(new Insets(5, 5, 5, 5));
+
+            // Estimate the width that this label will take (this is a rough estimate)
+            double labelWidth = word.length() * 10;  // Assuming each character is around 7 pixels wide
+
+            if (currentWidth + labelWidth > maxWidth-10) {
+                // This label won't fit, need a new row
+                wordContainer.getChildren().add(rowContainer);
+                rowContainer = new HBox();
+                rowContainer.setSpacing(10);
+                currentWidth = 0;
             }
 
-            // Add the row to the VBox
-            numberContainer.getChildren().add(rowContainer);
+            rowContainer.getChildren().add(wordLabel);
+            currentWidth += labelWidth + 10; // Adding 10 for spacing
+        }
+
+        // Add any remaining words in the last row
+        if (!rowContainer.getChildren().isEmpty()) {
+            wordContainer.getChildren().add(rowContainer);
         }
 
         // Set the content of the wordsPane to the VBox
-        wordsPane.setContent(numberContainer);
+        wordsPane.setContent(wordContainer);
     }
+
+
+
+
 
     @FXML
     private void onUploadButtonClick(){
@@ -178,7 +247,7 @@ public class MinibarController {
         FileChooser fileChooser = new FileChooser();
 
         // Optional: Set extension filters
-        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Text files (*.pdf)", "*.pdf");
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Text files (*.pgf)", "*.pgf");
         fileChooser.getExtensionFilters().add(extFilter);
 
         // Show open file dialog and store user-selected file in a File object
@@ -187,19 +256,88 @@ public class MinibarController {
         // Do something with the file (e.g., read it, display it, etc.)
         if(file != null){
             // Logic for handling the selected file
+            ObservableList<GrammarFile> grammars = FXCollections.observableArrayList();
             System.out.println("Selected file: " + file.getAbsolutePath());
+            System.out.println("Selected file: " + file.getName());
+            GrammarFile newGrammar = new GrammarFile(file.getName(), file.getAbsolutePath());
+            grammarDropdown.getItems().add(newGrammar);
+            //grammarDropdown.getSelectionModel().select(newGrammar);  // Automatically select the new item
         }
     }
+
+    public void onSelectGrammar(ActionEvent actionEvent) {
+        //GrammarManager gm = new GrammarManager();
+        GrammarFile selected = grammarDropdown.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            String fileName = selected.getName();
+            String filePath = selected.getPath();
+            gm.loadGrammar(fileName, filePath);
+            //System.out.println(gm.getCategories());
+            populateStartCat(gm);
+            populateLanguages(gm);
+
+        }
+    }
+
+    public void onSelectFrom(ActionEvent actionEvent){
+        onClearButtonClick();
+    }
+
+    public void onSelectTo(ActionEvent actionEvent){
+        HBox selectedPanel = currentSelectedSentenceController.getSelectedSentencePanel();
+        //Update the concatenated string to be displayed
+        currentSelectedSentenceController.displayConcatenatedText(selectedPanel);
+
+    }
+
+
+    public void populateStartCat(GrammarManager gm){
+        List<String> categories = gm.getCategories();
+        startcatDropdown.setItems(FXCollections.observableArrayList(categories));
+    }
+
+    public void populateLanguages(GrammarManager gm){
+        //populate from dropdown
+        System.out.println(gm.getLanguages());
+        List<String> langs = gm.getLanguages();
+        fromDropdown.setItems(FXCollections.observableArrayList(langs));
+        //populate to dropdown
+        toDropdown.setItems(FXCollections.observableArrayList(langs));
+
+    }
+
+
 
     @FXML
     private Label concatLabel; // fx:id="concatLabel" in MiniBar.fxml
 
-    public void setConcatLabel(String text) {
-        if (concatLabel != null) {
-            concatLabel.setText(text);
+    public void translate(String text) {
+        String selectedFrom = fromDropdown.getSelectionModel().getSelectedItem();
+        String selectedTo = toDropdown.getSelectionModel().getSelectedItem();
+        //System.out.println(selectedFrom+":"+selectedTo);
+        //String text2 = "he can buy water at a pub";
+        //System.out.println(text2);
+        try{
+            ArrayList<String> translations = (ArrayList<String>) gm.getTranslation(text,selectedFrom, selectedTo);
+            clearTranslationPanels();
+            for (String item : translations) {
+                int index = item.indexOf("=");  // Find the index of '='
+
+                if (index != -1 && index < item.length() - 1) {
+                    String textAfter = item.substring(index + 1).trim();
+                    System.out.println(textAfter);
+                    addTranslationPanel(textAfter);
+                }
+            }
+            //System.out.println(sentence);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        /*if (concatLabel != null) {
+            concatLabel.setText(sentence.toString());
         } else {
             System.out.println("concatLabel is null");
-        }
+        }*/
     }
 
     @FXML
@@ -223,8 +361,51 @@ public class MinibarController {
 
             // Optionally, reset the currentSelectedSentenceController
             currentSelectedSentenceController = null;
-            setConcatLabel("");
+            translate("");
         }
     }
+
+    public void onRandomButtonClick() {
+        // Create a new RandomGenerator instance (you might need to pass necessary arguments to its constructor)
+        RandomGenerator randomizer = new RandomGenerator(gm);
+
+        // Generate a random string using the RandomGenerator
+        String selectedFrom = fromDropdown.getSelectionModel().getSelectedItem();
+        String selectedCat = startcatDropdown.getSelectionModel().getSelectedItem();
+        String randomString = randomizer.generate(selectedFrom, selectedCat);
+
+        // Split the random string into individual words
+        String[] words = randomString.split("\\s+");
+
+        if (currentSelectedSentenceController == null) {
+            return;
+        }
+
+        // Get the selected sentencePanel from the current SentenceController
+        HBox selectedSentencePanel = currentSelectedSentenceController.getSelectedSentencePanel();
+        if (selectedSentencePanel == null) {
+            return;
+        }
+
+        // Clear existing TextFields
+        HBox wordBox = (HBox) selectedSentencePanel.lookup("#wordBox");
+        wordBox.getChildren().clear();
+
+        // Populate TextFields in the selected sentencePanel
+        for (String word : words) {
+            TextField newTextField = new TextField(word);
+            newTextField.setId("textField");
+            newTextField.setPrefWidth(63);
+            // Add your necessary configurations like setting up KeyListeners, etc.
+
+            HBox.setMargin(newTextField, new Insets(0, 0, 0, 5));
+            wordBox.getChildren().add(newTextField);
+        }
+
+        // Update concatenated text, translation, or any other UI elements
+        currentSelectedSentenceController.displayConcatenatedText(selectedSentencePanel);
+    }
+
+
 
 }

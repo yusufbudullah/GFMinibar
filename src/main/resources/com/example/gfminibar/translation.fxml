@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+
+<HBox fx:id="translationPanel" alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="50.0" prefWidth="615.0" style="-fx-background-color: #f2efea; -fx-background-radius: 10; -fx-border-radius: 10;" styleClass="rounded-scroll-pane" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.gfminibar.TranslationController">
+   <children>
+      <Label fx:id="langLabel" text="Label">
+         <HBox.margin>
+            <Insets />
+         </HBox.margin>
+         <padding>
+            <Insets left="15.0" right="15.0" />
+         </padding>
+      </Label>
+   </children>
+</HBox>

@@ -1,0 +1,4 @@
+.rounded-scroll-pane {
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+}

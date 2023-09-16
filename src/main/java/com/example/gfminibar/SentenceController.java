@@ -167,6 +167,10 @@ public class SentenceController {
         }
     }
 
+    public HBox getSelectedSentencePanel(){
+        return selectedPanel;
+    }
+
 
     public void setSentencePanelToRadioButtonMapping(HBox sentencePanel, RadioButton radioButton) {
         sentencePanelToRadioButtonMap.put(sentencePanel, radioButton);
@@ -220,8 +224,10 @@ public class SentenceController {
     public void displayConcatenatedText(HBox sentencePanel) {
         String text = concatenateTextFields(sentencePanel);
         System.out.println("Selected panel text: " + text);
+
         if (minibarController != null) {
-            minibarController.setConcatLabel(text);
+            minibarController.populateWordsPane(text);
+            minibarController.translate(text);
         }
 
 
@@ -243,14 +249,13 @@ public class SentenceController {
                 // Populate the last TextField if found
                 if (lastTextField != null) {
                     lastTextField.setText(text);
+                    lastTextField.setPrefWidth(63); // Set the width to 20
+                    lastTextField.setStyle("-fx-margin: 0 0 0 15;"); // Set padding on the left to 5
                     addNewTextFieldToWordBox();
                 }
             }
         }
     }
-
-
-
 
 
 }

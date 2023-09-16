@@ -3,9 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
@@ -29,7 +27,7 @@
                   <Insets left="20.0" />
                </HBox.margin>
             </Text>
-            <ComboBox fx:id="grammarDropdown" prefWidth="150.0" />
+            <ComboBox fx:id="grammarDropdown" onAction="#onSelectGrammar" prefWidth="150.0" />
             <Button fx:id="uploadButton" mnemonicParsing="false" onAction="#onUploadButtonClick" style="-fx-background-color: E9ECEF;" text="+" textAlignment="CENTER">
                <HBox.margin>
                   <Insets left="12.0" />
@@ -51,13 +49,13 @@
                   <Insets left="20.0" />
                </HBox.margin>
             </Text>
-            <ComboBox fx:id="fromDropdown" prefWidth="150.0" />
+            <ComboBox fx:id="fromDropdown" onAction="#onSelectFrom" prefWidth="150.0" />
             <Text strokeType="OUTSIDE" strokeWidth="0.0" text="To:" textAlignment="CENTER" wrappingWidth="73.13459777832031">
                <HBox.margin>
                   <Insets left="20.0" />
                </HBox.margin>
             </Text>
-            <ComboBox fx:id="toDropdown" prefWidth="150.0" />
+            <ComboBox fx:id="toDropdown" onAction="#onSelectTo" prefWidth="150.0" />
          </children>
       </HBox>
       <HBox prefHeight="480.0" prefWidth="1280.0">
@@ -66,7 +64,7 @@
                <children>
                   <HBox alignment="CENTER_RIGHT" prefHeight="47.0" prefWidth="640.0" style="-fx-background-color: #5b6e74;">
                      <children>
-                        <Button fx:id="randomButton" mnemonicParsing="false" text="Random">
+                        <Button fx:id="randomButton" mnemonicParsing="false" onAction="#onRandomButtonClick" text="Random">
                            <HBox.margin>
                               <Insets left="10.0" />
                            </HBox.margin>
@@ -95,17 +93,13 @@
                   </ScrollPane>
                </children>
             </VBox>
-            <AnchorPane prefHeight="480.0" prefWidth="639.0">
-               <children>
-                  <Label fx:id="concatLabel" layoutX="29.0" layoutY="232.0" text="Label" />
-               </children>
-            </AnchorPane>
+            <ScrollPane fx:id="translationScroll" fitToWidth="true" prefHeight="435.0" prefWidth="640.0" style="-fx-background: #819fa7; -fx-background-color: #f2efea;" styleClass="rounded-scroll-pane" stylesheets="@translation.css">
+               <content>
+                  <VBox fx:id="translationPane" prefHeight="310.0" prefWidth="630.0" />
+               </content>
+            </ScrollPane>
          </children>
       </HBox>
-      <ScrollPane fx:id="wordsPane" prefHeight="229.0" prefWidth="1280.0" style="-fx-background: #f2efea; -fx-background-color: #5b6e74;">
-        <content>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0" />
-        </content>
-      </ScrollPane>
+      <ScrollPane fx:id="wordsPane" prefHeight="229.0" prefWidth="1280.0" style="-fx-background: #819fa7; -fx-background-color: #5b6e74;" />
    </children>
 </VBox>

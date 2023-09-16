@@ -9,8 +9,5 @@
         <module name="GFMinibar" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="GFMinibar" target="17" />
-    </bytecodeTargetLevel>
   </component>
 </project>
