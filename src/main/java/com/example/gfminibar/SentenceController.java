@@ -3,10 +3,7 @@ package com.example.gfminibar;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Toggle;
-import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -18,176 +15,176 @@ import java.util.List;
 import java.util.Map;
 
 public class SentenceController {
+    // ---- Class Members and UI Controls ----
+    // Class members and UI controls are defined here
 
+    // ScrollPane that contains word-related UI components
     @FXML
-    // List to store references to dynamically created TextFields
-    private List<TextField> textFieldList = new ArrayList<>();
-    // List to store references to dynamically created sentence panels
+    private ScrollPane scrollWordPane;
+
+    // List to hold dynamically created sentence panels (HBox elements)
     public List<HBox> sentencePanelList = new ArrayList<>();
-    // Map to link sentence panels to radio buttons
+
+    // List to hold dynamically created TextFields within the sentence panels
+    private List<TextField> textFieldList = new ArrayList<>();
+
+    // Map to associate each sentence panel (HBox) with its corresponding RadioButton
     private Map<HBox, RadioButton> sentencePanelToRadioButtonMap = new HashMap<>();
 
+    // Controller responsible for managing a minibar UI component
     private MinibarController minibarController;
 
+    // ToggleGroup that holds the RadioButtons for sentence selection
     private ToggleGroup globalToggleGroup;
 
+    // Reference to the currently selected sentence panel (HBox)
     private HBox selectedPanel;
 
 
-    public void setMinibarController(MinibarController minibarController) {
-        this.minibarController = minibarController;
-    }
+    // ---- Initialization Methods ----
+    // Methods related to setting up the class
 
-    public void setGlobalToggleGroup(ToggleGroup globalToggleGroup) {
-        this.globalToggleGroup = globalToggleGroup;
-    }
+    // ---- Accessor Methods ----
+    // Getters for the class variables
 
-    public HBox getSelectedPanel() {
-        return selectedPanel;
-    }
-
+    /**
+     * Provides access to the map linking sentence panels to radio buttons.
+     *
+     * @return A Map where the key is an HBox representing a sentence panel, and the value is its associated RadioButton.
+     */
     public Map<HBox, RadioButton> getSentencePanelToRadioButtonMap() {
+        // Return the mapping of HBox panels to RadioButtons
         return sentencePanelToRadioButtonMap;
     }
 
+    /**
+     * Retrieves the list of all sentence panels.
+     *
+     * @return A List of HBox elements, each representing a sentence panel.
+     */
     public List<HBox> getSentencePanelList() {
+        // Return the list of HBox panels representing sentences
         return sentencePanelList;
     }
 
-
-
-
-    private String concatenateTextFields(HBox sentencePanel) {
-        HBox wordBox = (HBox) sentencePanel.lookup("#wordBox");
-        StringBuilder concatenatedText = new StringBuilder();
-
-        for (Node node : wordBox.getChildren()) {
-            if (node instanceof TextField) {
-                TextField textField = (TextField) node;
-                concatenatedText.append(textField.getText()).append(" ");
-            }
-        }
-
-        return concatenatedText.toString().trim();
+    /**
+     * Retrieves the currently selected sentence panel.
+     *
+     * @return The HBox representing the selected sentence panel.
+     */
+    public HBox getSelectedSentencePanel() {
+        // Return the currently selected sentence panel
+        return selectedPanel;
     }
 
+    // ---- Setters Methods ----
+    // Methods for setting up mappings and lists
 
+    /**
+     * Sets the MinibarController for this class.
+     *
+     * @param minibarController The controller responsible for managing the minibar UI component.
+     */
+    public void setMinibarController(MinibarController minibarController) {
+        // Assign the incoming minibarController to the class variable
+        this.minibarController = minibarController;
+    }
 
+    /**
+     * Assigns a ToggleGroup to the globalToggleGroup variable.
+     *
+     * @param globalToggleGroup The ToggleGroup responsible for managing the RadioButtons for sentence selection.
+     */
+    public void setGlobalToggleGroup(ToggleGroup globalToggleGroup) {
+        // Set the class variable globalToggleGroup to the provided ToggleGroup instance
+        this.globalToggleGroup = globalToggleGroup;
+    }
 
+    /**
+     * Sets the mapping between a sentence panel and its corresponding radio button.
+     *
+     * @param sentencePanel The HBox representing a sentence panel.
+     * @param radioButton The RadioButton associated with the sentence panel.
+     */
+    public void setSentencePanelToRadioButtonMapping(HBox sentencePanel, RadioButton radioButton) {
+        // Map the provided sentence panel to its radio button
+        sentencePanelToRadioButtonMap.put(sentencePanel, radioButton);
+    }
+
+    /**
+     * Replaces the list of sentence panels.
+     *
+     * @param list The new list of sentence panels.
+     */
+    public void setSentencePanelList(List<HBox> list) {
+        // Replace the existing list of sentence panels with the provided list
+        this.sentencePanelList = list;
+    }
+
+    // ---- UI Event Handlers ----
+    // Methods handling UI events such as button clicks, key presses, etc.
+
+    /**
+     * Handles the Enter key press event.
+     *
+     * @param event The KeyEvent generated by the key press.
+     */
     @FXML
     private void onEnterKeyPressed(KeyEvent event) {
+        // Check if the key pressed is "Enter"
         if (event.getCode().getName().equals("Enter")) {
+            // Call the method to add a new TextField to the wordBox
             addNewTextFieldToWordBox(event);
         }
     }
 
-    private void addNewTextFieldToWordBox(KeyEvent event) {
-        TextField sourceTextField = (TextField) event.getSource();
-
-        // Create a new TextField instance
-        TextField newTextField = new TextField();
-        newTextField.setId("textField");
-        newTextField.setPrefHeight(sourceTextField.getPrefHeight());
-        newTextField.setPrefWidth(63); // Set the width to 20
-        newTextField.setOnKeyPressed(this::onEnterKeyPressed);
-
-        // Get the parent sentencePanel
-        HBox sentencePanel = (HBox) sourceTextField.getParent();
-
-        // Get the wordBox within the sentencePanel
-        HBox wordBox = (HBox) sentencePanel.lookup("#wordBox");
-
-        // Set margin to 5 on the left
-        HBox.setMargin(newTextField, new Insets(0, 0, 0, 5));
-
-        // Add the new TextField to the wordBox
-        wordBox.getChildren().add(newTextField);
-
-        // Request focus on the new TextField
-        newTextField.requestFocus();
-
-        textFieldList.add(newTextField);
-        displayConcatenatedText(sentencePanel);
-    }
-
-    private void addNewTextFieldToWordBox() {
-        if (selectedPanel == null) {
-            return;
-        }
-
-        // Create a new TextField instance
-        TextField newTextField = new TextField();
-        newTextField.setId("textField");
-        newTextField.setPrefWidth(63); // Set the width to 20
-        newTextField.setStyle("-fx-margin: 0 0 0 15;"); // Set padding on the left to 5
-
-        // Setting the height based on an existing TextField in the wordBox, or default to some value
-        HBox wordBox = (HBox) selectedPanel.lookup("#wordBox");
-        if (!wordBox.getChildren().isEmpty()) {
-            TextField existingTextField = (TextField) wordBox.getChildren().get(0); // Assuming the first child is a TextField
-            newTextField.setPrefHeight(existingTextField.getPrefHeight());
-        } else {
-            newTextField.setPrefHeight(30); // Set a default value
-        }
-
-        // Add the new TextField to the wordBox
-        wordBox.getChildren().add(newTextField);
-
-        // Request focus on the new TextField
-        newTextField.requestFocus();
-
-        displayConcatenatedText(selectedPanel);
-    }
-
-
-
+    /**
+     * Handles a mouse click event on a sentence panel.
+     *
+     * @param event The MouseEvent generated by the click.
+     */
     @FXML
     private void onSentencePanelClick(MouseEvent event) {
+        // Identify the clicked sentence panel and its associated radio button
         selectedPanel = (HBox) event.getSource();
         RadioButton radioButton = sentencePanelToRadioButtonMap.get(selectedPanel);
 
-        // Reset all panels to their default style
+        // Reset the styling for all sentence panels
         for (HBox panel : sentencePanelList) {
             panel.getStyleClass().remove("selected-panel");
         }
 
-        // Highlight this panel
+        // Style and focus the clicked sentence panel
         selectedPanel.getStyleClass().add("selected-panel");
-        // Request focus on the new TextField
         selectedPanel.requestFocus();
         displayConcatenatedText(selectedPanel);
 
+        // Select the associated radio button
         if (radioButton != null) {
             radioButton.setSelected(true);
         }
 
-        // Set this controller as the currently selected one
+        // Set this controller as the currently selected one in the minibarController
         if (minibarController != null) {
             minibarController.setCurrentSelectedSentenceController(this);
         }
     }
 
-    public HBox getSelectedSentencePanel(){
-        return selectedPanel;
-    }
-
-
-    public void setSentencePanelToRadioButtonMapping(HBox sentencePanel, RadioButton radioButton) {
-        sentencePanelToRadioButtonMap.put(sentencePanel, radioButton);
-    }
-
-    public void setSentencePanelList(List<HBox> list) {
-        this.sentencePanelList = list;
-    }
-
-
+    /**
+     * Handles the delete and backspace key events.
+     *
+     * @param event The KeyEvent generated by the key press.
+     */
     @FXML
     private void onDeleteKeyPressed(KeyEvent event) {
         KeyCode keyCode = event.getCode();
+        // Check if the Delete or Backspace key is pressed
         if (keyCode == KeyCode.DELETE || keyCode == KeyCode.BACK_SPACE) {
+            // Get the selected RadioButton, if any
             Toggle selectedToggle = globalToggleGroup.getSelectedToggle();
             if (selectedToggle != null) {
                 RadioButton selectedRadioButton = (RadioButton) selectedToggle;
+                // Find and update the associated sentence panel
                 HBox sentencePanel = findSentencePanelByRadioButton(selectedRadioButton);
                 if (sentencePanel != null) {
                     removeLastTextField(sentencePanel);
@@ -197,7 +194,124 @@ public class SentenceController {
         }
     }
 
+    // ---- Helper Methods ----
+    // Utility methods assisting event handlers
+
+    /**
+     * Concatenates the text from all TextFields within a given sentence panel.
+     *
+     * @param sentencePanel The HBox containing the TextFields to be concatenated.
+     * @return A single String containing the concatenated text from the TextFields.
+     */
+    private String concatenateTextFields(HBox sentencePanel) {
+        // Initialize variables and look up the wordBox within the sentence panel
+        HBox wordBox = (HBox) sentencePanel.lookup("#wordBox");
+        StringBuilder concatenatedText = new StringBuilder();
+
+        // Loop through each child node in the wordBox
+        for (Node node : wordBox.getChildren()) {
+            // Check if the node is a TextField
+            if (node instanceof TextField) {
+                // Cast the node to TextField and append its text to the StringBuilder
+                TextField textField = (TextField) node;
+                concatenatedText.append(textField.getText()).append(" ");
+            }
+        }
+
+        // Return the concatenated text as a String, trimming any extra spaces
+        return concatenatedText.toString().trim();
+    }
+
+    /**
+     * Adds a new TextField to a wordBox, which is a child of the sentencePanel.
+     *
+     * @param event The KeyEvent that triggered this method.
+     */
+    private void addNewTextFieldToWordBox(KeyEvent event) {
+        // Extracting relevant information from the event
+        TextField sourceTextField = (TextField) event.getSource();
+        HBox sentencePanel = (HBox) sourceTextField.getParent();
+        HBox wordBox = (HBox) sentencePanel.lookup("#wordBox");
+
+        // Create and configure new TextField
+        TextField newTextField = createAndConfigureNewTextField(sourceTextField);
+
+        // Update UI components
+        updateWordBoxAndLayout(wordBox, newTextField, sentencePanel);
+    }
+
+    /**
+     * Adds a new TextField to a selected wordBox.
+     */
+    private void addNewTextFieldToWordBox() {
+        // Exit if no panel is selected
+        if (selectedPanel == null) {
+            return;
+        }
+
+        // Look up the wordBox within the selectedPanel
+        HBox wordBox = (HBox) selectedPanel.lookup("#wordBox");
+
+        // Create and configure new TextField
+        TextField newTextField = createAndConfigureNewTextField(wordBox);
+
+        // Update UI components
+        updateWordBoxAndLayout(wordBox, newTextField, selectedPanel);
+    }
+
+    /**
+     * Creates a new TextField and configures its properties.
+     *
+     * @param source The source UI component used for setting some properties of the new TextField.
+     * @return A new, configured TextField.
+     */
+    private TextField createAndConfigureNewTextField(Node source) {
+        TextField newTextField = new TextField();
+        newTextField.setId("textField");
+        double fixedWidth = 63;
+        newTextField.setPrefWidth(fixedWidth);
+        newTextField.setMinWidth(fixedWidth);
+        newTextField.setMaxWidth(fixedWidth);
+        newTextField.setOnKeyPressed(this::onEnterKeyPressed);
+
+        return newTextField;
+    }
+
+    /**
+     * Updates the wordBox and layout, and adds a new TextField to it.
+     *
+     * @param wordBox The wordBox to which the new TextField will be added.
+     * @param newTextField The new TextField to add.
+     * @param sentencePanel The sentencePanel containing the wordBox.
+     */
+    private void updateWordBoxAndLayout(HBox wordBox, TextField newTextField, HBox sentencePanel) {
+        // Set margin to 5 on the left
+        HBox.setMargin(newTextField, new Insets(0, 0, 0, 5));
+
+        // Add new TextField and update layout
+        wordBox.getChildren().add(newTextField);
+        wordBox.setPrefWidth(wordBox.getPrefWidth() + 63 + 5);  // Update the preferred width
+        newTextField.requestFocus();  // Set focus on the new TextField
+
+        // Update the ScrollPane layout if it exists
+        if (scrollWordPane != null) {
+            scrollWordPane.layout();
+            scrollWordPane.setHvalue(1.0);  // Scroll to the far right
+        }
+
+        // Add to the TextField list and update the concatenated text display
+        textFieldList.add(newTextField);
+        displayConcatenatedText(sentencePanel);
+    }
+
+    /**
+     * Finds the sentence panel associated with a given RadioButton.
+     *
+     * @param radioButton The RadioButton whose sentence panel is to be found.
+     * @return The HBox representing the associated sentence panel.
+     */
     private HBox findSentencePanelByRadioButton(RadioButton radioButton) {
+        // Search for the sentence panel mapped to the given RadioButton
         return sentencePanelToRadioButtonMap.entrySet()
                 .stream()
                 .filter(entry -> entry.getValue().equals(radioButton))
@@ -206,13 +320,25 @@ public class SentenceController {
                 .orElse(null);
     }
 
+    /**
+     * Removes the last TextField from a given sentence panel.
+     *
+     * @param sentencePanel The HBox representing the sentence panel.
+     */
     private void removeLastTextField(HBox sentencePanel) {
+        double fixedWidth = 63; // The fixed width of a TextField
         HBox wordBox = (HBox) sentencePanel.lookup("#wordBox");
         int childrenCount = wordBox.getChildren().size();
 
         if (childrenCount > 1) {
+            // Remove the last TextField
             TextField lastTextField = (TextField) wordBox.getChildren().get(childrenCount - 1);
             wordBox.getChildren().remove(lastTextField);
+
+            // Update the preferred width of the wordBox
+            double newWidth = wordBox.getPrefWidth() - fixedWidth - 5; // 5 is the left margin
+            wordBox.setPrefWidth(newWidth);
+
         } else if (childrenCount == 1) {
             // If only one TextField remains, clear its text instead of removing it.
             TextField remainingTextField = (TextField) wordBox.getChildren().get(0);
@@ -220,43 +346,78 @@ public class SentenceController {
         }
     }
 
+    /**
+     * Finds the last TextField within a given wordBox.
+     *
+     * @param wordBox The HBox that contains the TextFields.
+     * @return The last TextField in the wordBox, or null if none are found.
+     */
+    private TextField findLastTextField(HBox wordBox) {
+        TextField lastTextField = null;
+        // Iterate through each child node in the wordBox to find the last TextField
+        for (Node node : wordBox.getChildren()) {
+            if (node instanceof TextField) {
+                lastTextField = (TextField) node;
+            }
+        }
+        return lastTextField;
+    }
 
+    /**
+     * Updates the last TextField's properties and layout after populating it.
+     *
+     * @param lastTextField The last TextField in the wordBox.
+     * @param text The text to populate the TextField with.
+     */
+    private void updateTextFieldAndLayout(TextField lastTextField, String text) {
+        // Populate the TextField and set its dimensions
+        double fixedWidth = 63;
+        lastTextField.setText(text);
+        lastTextField.setPrefWidth(fixedWidth);
+        lastTextField.setMinWidth(fixedWidth);
+        lastTextField.setMaxWidth(fixedWidth);
+
+        // Add margin
+        HBox.setMargin(lastTextField, new Insets(0, 0, 0, 5));
+
+        // Create and add a new empty TextField
+        addNewTextFieldToWordBox();
+    }
+
+    // ---- UI Update Methods ----
+    // Methods specifically related to updating UI components
+
+    /**
+     * Displays concatenated text from all TextFields within a given sentence panel.
+     *
+     * @param sentencePanel The HBox representing the sentence panel.
+     */
     public void displayConcatenatedText(HBox sentencePanel) {
         String text = concatenateTextFields(sentencePanel);
-        System.out.println("Selected panel text: " + text);
 
         if (minibarController != null) {
             minibarController.populateWordsPane(text);
             minibarController.translate(text);
         }
-
-
     }
 
+    /**
+     * Populates the last TextField in the currently selected sentence panel with the given text.
+     *
+     * @param text The text to populate the TextField with.
+     */
     public void populateTextField(String text) {
-        // Assuming the currently selected sentencePanel is stored in a variable called "selectedPanel"
         if (selectedPanel != null) {
+            // Find the wordBox and last TextField within it
             HBox wordBox = (HBox) selectedPanel.lookup("#wordBox");
-            if (wordBox != null && !wordBox.getChildren().isEmpty()) {
-                // Find the last TextField within the wordBox
-                TextField lastTextField = null;
-                for (Node node : wordBox.getChildren()) {
-                    if (node instanceof TextField) {
-                        lastTextField = (TextField) node;
-                    }
-                }
+            TextField lastTextField = findLastTextField(wordBox);
 
-                // Populate the last TextField if found
-                if (lastTextField != null) {
-                    lastTextField.setText(text);
-                    lastTextField.setPrefWidth(63); // Set the width to 20
-                    lastTextField.setStyle("-fx-margin: 0 0 0 15;"); // Set padding on the left to 5
-                    addNewTextFieldToWordBox();
-                }
+            // Populate the last TextField and update layout
+            if (lastTextField != null) {
+                updateTextFieldAndLayout(lastTextField, text);
             }
         }
     }
-
 
 }
 

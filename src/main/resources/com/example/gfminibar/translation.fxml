@@ -3,16 +3,23 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
 
 <HBox fx:id="translationPanel" alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="50.0" prefWidth="615.0" style="-fx-background-color: #f2efea; -fx-background-radius: 10; -fx-border-radius: 10;" styleClass="rounded-scroll-pane" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.gfminibar.TranslationController">
    <children>
-      <Label fx:id="langLabel" text="Label">
-         <HBox.margin>
-            <Insets />
-         </HBox.margin>
-         <padding>
-            <Insets left="15.0" right="15.0" />
-         </padding>
-      </Label>
+      <Pane fx:id="transPanel" prefHeight="50.0" prefWidth="616.0">
+         <children>
+            <Label fx:id="langLabel" layoutX="279.0" layoutY="17.0" text="Label">
+               <padding>
+                  <Insets left="15.0" right="15.0" />
+               </padding>
+            </Label>
+            <Label fx:id="langNameLabel" layoutY="17.0" text="Label">
+               <padding>
+                  <Insets left="15.0" right="15.0" />
+               </padding>
+            </Label>
+         </children>
+      </Pane>
    </children>
 </HBox>

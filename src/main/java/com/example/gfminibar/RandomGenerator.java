@@ -1,46 +1,78 @@
 package com.example.gfminibar;
 
-import com.example.gfminibar.GrammarManager;
-import org.grammaticalframework.pgf.*;
+import org.grammaticalframework.pgf.PGF;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class RandomGenerator{
-    private String random;
+public class RandomGenerator {
     private PGF pgf;
     private GrammarManager gManager;
 
-    public RandomGenerator(GrammarManager gm){
+    /**
+     * Constructor initializes the RandomGenerator with a GrammarManager instance.
+     *
+     * @param gm An instance of GrammarManager.
+     */
+    public RandomGenerator(GrammarManager gm) {
         pgf = gm.getGrammar();
         gManager = gm;
     }
 
-    public String generate(String language,String category){
+    /**
+     * Generates a random sentence based on a language and category.
+     *
+     * @param language  The language in which the sentence should be generated.
+     * @param category  The grammatical category to use.
+     * @return A randomly generated sentence.
+     */
+    public String generate(String language, String category) {
+        String sentence = "";
+        String chosen;
+        int wordCount = 0;  // Counter for the number of words in the sentence
 
-            String sentence = "";
-            List<String> words = gManager.loadWords(language, category, ""); //
-            String chosen = select(words);
-            sentence = sentence + chosen + " ";
+        // Initialize with a random word from the category
+        List<String> words = gManager.loadWords(language, category, "");
+        chosen = select(words);
+        sentence += chosen + " ";
+        wordCount++;
 
-            while(!chosen.equals("")){
+        // Continue to append words until an empty word is returned or the word count limit is reached
+        while (!chosen.equals("") && wordCount < 10) {
+            words = gManager.loadWords(language, pgf.getStartCat(), sentence);
+            chosen = select(words);
+            sentence += chosen + " ";
+            wordCount++;
+        }
 
-                words = gManager.loadWords(language, pgf.getStartCat(), sentence);
-                chosen = select(words);
-                sentence = sentence + chosen + " ";
-            }
-            return sentence;
+        // Validate the sentence; if invalid, regenerate
+        if (!validate(sentence, language)) {
+            sentence = generate(language, category);
+        }
 
+        return sentence;
     }
 
-    //selects a random word in a given array
-    private String select(List<String> words){
-        String word="";
-        if(words.size() != 0){
-         word = words.get((int) (Math.random() * words.size()));}
+    /**
+     * Randomly selects a word from a list of words.
+     *
+     * @param words The list of words.
+     * @return A randomly selected word.
+     */
+    private String select(List<String> words) {
+        if (words.isEmpty()) {
+            return "";
+        }
+        return words.get((int) (Math.random() * words.size()));
+    }
 
-        else{}
-
-        return word;
+    /**
+     * Validates if a generated sentence can be translated.
+     *
+     * @param s        The sentence to validate.
+     * @param language The language of the sentence.
+     * @return True if the sentence can be translated, false otherwise.
+     */
+    private boolean validate(String s, String language) {
+        return gManager.getTranslation(s, language, "All") != null;
     }
 }
