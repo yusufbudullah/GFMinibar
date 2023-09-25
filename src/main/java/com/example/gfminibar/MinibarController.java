@@ -1051,7 +1051,7 @@ public class MinibarController {
 
         // Add suggested words first, if any
         if (!finalSuggestedWords.isEmpty()) {
-            addWordsToContainer(finalSuggestedWords, "-fx-border-color: black; -fx-background-color: red; -fx-text-fill: black;", wordContainer, maxWidth);
+            addWordsToContainer(finalSuggestedWords, "-fx-border-color: black; -fx-background-color: #b7d7e7; -fx-text-fill: black;", wordContainer, maxWidth);
         }
 
         // Add other words
