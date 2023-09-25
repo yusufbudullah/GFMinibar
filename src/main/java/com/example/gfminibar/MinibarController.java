@@ -2,7 +2,6 @@ package com.example.gfminibar;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
 import javafx.event.ActionEvent;
@@ -15,17 +14,15 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-import javafx.scene.control.Accordion;
+
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.function.Consumer;
 
-import org.grammaticalframework.pgf.*;
+import javafx.stage.Stage;
 
 
 public class MinibarController {
@@ -41,7 +38,7 @@ public class MinibarController {
     @FXML
     private ComboBox<String> startcatDropdown;
     @FXML
-    private ComboBox<String> fromDropdown;
+    private  ComboBox<String> fromDropdown;
     @FXML
     private ComboBox<String> toDropdown;
     @FXML
@@ -52,6 +49,8 @@ public class MinibarController {
     private ProgressIndicator progressIndicator;
     @FXML
     private ProgressIndicator progressTranslateIndicator;
+    @FXML
+    private Button exportButton;
 
     // This ToggleGroup is used for managing radio buttons globally across different panels
     private ToggleGroup globalToggleGroup = new ToggleGroup();
@@ -59,11 +58,20 @@ public class MinibarController {
     // A counter used for generating unique radio button IDs
     private int radioButtonCounter = 1;
 
+    // A String to store current sentence
+    private String sentence;
+
+    // A List to store current translations
+    static ArrayList<String> translations;
+
     // List to hold global sentence panels for easy management
     public List<HBox> globalSentencePanelList = new ArrayList<>();
 
     // An instance of a custom predictive word model for sentence suggestions
     PredictiveWordModel predictive = new PredictiveWordModel();
+
+    // An instance of a custom PDF Formatter for exporting translations
+    static PdfFormatter pdfFormatter = new PdfFormatter();
 
     // An instance of a custom class for grammar management
     @FXML
@@ -214,6 +222,42 @@ public class MinibarController {
         configureTaskEvents(task, selectedSentencePanel);
         new Thread(task).start();
     }
+
+    /**
+     * Called when the export button is clicked.
+     */
+    @FXML
+    public void onExportButtonClick(ActionEvent event) {
+        // Get the Stage from the ActionEvent
+        Stage stage = (Stage) exportButton.getScene().getWindow();
+
+        // Initialize FileChooser
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Translations");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
+
+        // Show the FileChooser dialog and get the user-selected File
+        File file = fileChooser.showSaveDialog(stage);
+
+        // Get selected language and translations
+        String fromLanguage = fromDropdown.getSelectionModel().getSelectedItem();
+        Map<String, List<String>> sortLang = sortLangs(translations);
+        String text = sentence;
+
+        // If the user selected a File, try to save the PDF
+        if (file != null) {
+            try {
+                pdfFormatter.formatAndWriteTranslation(file, text, fromLanguage, sortLang);
+            } catch (IOException e) {
+                // Handle any IOExceptions
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+
+
 
     /**
      * Handles the selection of a grammar file from the dropdown menu.
@@ -618,7 +662,8 @@ public class MinibarController {
             protected ArrayList<String> call() throws Exception {
                 String selectedFrom = fromDropdown.getSelectionModel().getSelectedItem();
                 String selectedTo = toDropdown.getSelectionModel().getSelectedItem();
-                return (ArrayList<String>) gm.getTranslation(text, selectedFrom, selectedTo);
+                translations = (ArrayList<String>) gm.getTranslation(text, selectedFrom, selectedTo);
+                return translations;
             }
         };
     }
@@ -714,6 +759,7 @@ public class MinibarController {
      * @param text Text to be translated
      */
     public void translate(String text) {
+        sentence = text;
         // Create and configure the task for translation
         Task<ArrayList<String>> task = createTranslationTask(text);
 
@@ -1039,6 +1085,7 @@ public class MinibarController {
             // Check if translations for all languages are to be displayed
             if ("All".equals(selectedTo)) {
                 Map<String, List<String>> sortedLangs = sortLangs(translations);
+
                 for (String key : sortedLangs.keySet()) {
                     List<String> items = getItemsForKey(key, sortedLangs);
                     addTranslationTabPane(key);
@@ -1116,7 +1163,5 @@ public class MinibarController {
         // Retrieve the list of items for the given key, or return an empty list if the key doesn't exist
         return map.getOrDefault(key, Collections.emptyList());
     }
-
-
 
 }

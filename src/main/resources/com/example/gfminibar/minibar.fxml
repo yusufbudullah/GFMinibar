@@ -110,6 +110,18 @@
                               <Font name="System Bold" size="12.0" />
                            </font>
                         </Button>
+                        <Button fx:id="exportButton" mnemonicParsing="false" onAction="#onExportButtonClick">
+                           <graphic>
+                              <ImageView fitHeight="19.0" fitWidth="19.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@save.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                           <HBox.margin>
+                              <Insets left="10.0" />
+                           </HBox.margin>
+                        </Button>
                         <Button fx:id="addButton" mnemonicParsing="false" onAction="#onAddButtonClick">
                            <HBox.margin>
                               <Insets left="10.0" />
@@ -143,7 +155,7 @@
                   </ScrollPane>
                </children>
             </VBox>
-            <TabPane fx:id="translationTabPane" prefHeight="479.0" prefWidth="639.0" style="-fx-background-color: #891C29;" stylesheets="@styles.css" tabClosingPolicy="UNAVAILABLE" />
+            <TabPane fx:id="translationTabPane" prefHeight="479.0" prefWidth="640.0" style="-fx-background-color: #891C29;" stylesheets="@styles.css" tabClosingPolicy="UNAVAILABLE" />
          </children>
       </HBox>
       <ScrollPane fx:id="wordsPane" prefHeight="229.0" prefWidth="1280.0" styleClass="custom-scroll-pane" stylesheets="@styles.css" />

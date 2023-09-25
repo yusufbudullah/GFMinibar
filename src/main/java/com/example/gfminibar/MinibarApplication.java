@@ -24,19 +24,6 @@ public class MinibarApplication extends Application {
         stage.show();
 
 
-
-        // Get the controller instance
-        //MinibarController controller = fxmlLoader.getController();
-
-        // Call the populateWordsPane() method to initialize it
-        //controller.populateWordsPane();
-
-        //String gfilename = "C:\\Users\\yusuf_budullah\\IdeaProjects\\GFMinibar\\src\\main\\resources\\Letter (1).pgf";
-        //PGF pgf = PGF.readPGF(gfilename);
-
-        //List<String> categories = pgf.getCategories();
-        //System.out.println(categories);
-
     }
 
     public static void main(String[] args) {
